@@ -12,6 +12,8 @@ def clear_execution_numbers(nb_path):
             for output in cell["outputs"]:
                 if "execution_count" in output:
                     output["execution_count"] = None
+                    # Clear Output if Dont want to display any confidential data
+                    # cell["outputs"] = []  # Clear the outputs
     with open(nb_path, "w", encoding="utf-8") as f:
         nbformat.write(nb, f)
 

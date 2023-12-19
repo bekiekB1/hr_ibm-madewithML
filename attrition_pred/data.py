@@ -19,7 +19,7 @@ def load_data(dataset_loc: str) -> DataFrame:
         Dataset: Our dataset represented as a pandas dataframe
     """
     ds = pd.read_csv(dataset_loc)
-    ds = ds.random_shuffle(seed=1234)
+    ds = ds.sample(frac=1, random_state=1234).reset_index(drop=True)
     return ds
 
 
@@ -39,42 +39,6 @@ def stratify_split(df: DataFrame, val_size: int = 0.2, test_size: int = 0.5) -> 
     train_df, temp_df = train_test_split(df, stratify=df["Attrition"], test_size=val_size, random_state=2023)
     val_df, test_df = train_test_split(temp_df, stratify=temp_df["Attrition"], test_size=test_size, random_state=2023)
     return train_df, val_df, test_df
-
-
-def preprocess(attrition: DataFrame) -> list[DataFrame]:
-    """Preprocess Data
-
-    Args:
-        attrition (DataFrame): dataset that needs to be preprocessed
-
-    Returns:
-        list[DataFrame]: datamatrix and target represented as DataFrame
-    """
-    # Empty list to store columns with categorical data
-    categorical = []
-    for col, value in attrition.items():
-        if value.dtype == "object":
-            categorical.append(col)
-
-    # Store the numerical columns in a list numerical
-    numerical = attrition.columns.difference(categorical)
-
-    # Store the categorical data in a dataframe called attrition_cat
-    attrition_cat = attrition[categorical]
-    attrition_cat = attrition_cat.drop(["Attrition"], axis=1)  # Dropping the target column
-    attrition_cat = pd.get_dummies(attrition_cat)
-
-    # Store the numerical features to a dataframe attrition_num
-    attrition_num = attrition[numerical]
-    # Concat the two dataframes together columnwise
-    attrition_final = pd.concat([attrition_num, attrition_cat], axis=1)
-
-    # Define a dictionary for the target mapping
-    target_map = {"Yes": 1, "No": 0}
-    # Use the pandas apply method to numerically encode our attrition target variable
-    target = attrition["Attrition"].apply(lambda x: target_map[x])
-    # attrition_final['target'] = target
-    return attrition_final, target
 
 
 def preprocess(attrition: DataFrame, save_encoder=True) -> DataFrame:
@@ -116,8 +80,8 @@ def preprocess(attrition: DataFrame, save_encoder=True) -> DataFrame:
 
     feature_names = ohe.get_feature_names_out()
 
-    if save_encoder:
-        joblib.dump(ohe, "../model/saved_encoder/encoder.joblib")
+    if save_encoder:  # pragma: no cover, basic save
+        joblib.dump(ohe, "../model/saved_encoder/encoder.joblib")  # pragma: no cover, basic save
 
     # Step 4: Transform the original DataFrame
     df_encoded = ohe.transform(attrition_cat).toarray()
