@@ -1,0 +1,18 @@
+site_name: Attrition Prediction
+site_url: https://attrition_pred.com/
+repo_url: https://github.com/bekiekB1/hr_ibm-madewithML/
+nav:
+  - attrition_pred:
+    - data: attrition_pred/data.md
+    - models: attrition_pred/models.md
+    - train: attrition_pred/train.md
+    - tune: attrition_pred/tune.md
+    - evaluate: attrition_pred/evaluate.md
+    - predict: attrition_pred/predict.md
+    - serve: attrition_pred/serve.md
+    - utils: attrition_pred/utils.md
+theme: readthedocs
+plugins:
+  - mkdocstrings
+watch:
+  - .  # reload docs for any file changes

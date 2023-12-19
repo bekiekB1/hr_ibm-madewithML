@@ -1,0 +1,17 @@
+# Environment
+.env
+venv/
+
+data/
+logs/
+mlruns/
+efs/
+model/
+
+#python cache
+**__pycache__
+
+# mkdocs
+site/
+
+.DS_Store
