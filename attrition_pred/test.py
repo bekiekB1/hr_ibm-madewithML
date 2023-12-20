@@ -1,10 +1,21 @@
-def func(x: int) -> int:
-    """_summary_
+import typer
 
-    Args:
-        x (int): _description_
+app = typer.Typer()
 
-    Returns:
-        int: _description_
-    """
-    return x
+
+@app.command()
+def hello(name: str):
+    return name
+    print(f"Hello {name}")
+
+
+@app.command()
+def goodbye(name: str, formal: bool = False):
+    if formal:
+        print(f"Goodbye Ms. {name}. Have a good day.")
+    else:
+        print(f"Bye {name}!")
+
+
+if __name__ == "__main__":
+    app()

@@ -1,9 +1,10 @@
 import argparse
+import json
 from http import HTTPStatus
 from typing import Dict
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from starlette.requests import Request
 
 from attrition_pred import evaluate, predict
@@ -24,9 +25,25 @@ class ModelDeployment:
         return {"run_id": self.run_id}
 
     def evaluate_model(self, request: Request) -> Dict:
-        data = request.json()
-        results = evaluate.evaluate(run_id=self.run_id, dataset_loc=data.get("dataset"))
-        return {"results": results}
+        try:
+            # Retrieve the raw bytes from the request body
+            raw_data = request.body()
+
+            # Decode the bytes to a string
+            json_string = raw_data.decode("utf-8")
+
+            # Parse the JSON string into a dictionary
+            data = json.loads(json_string)
+
+            # Now you can use the 'data' dictionary in your prediction logic
+            results = predict.predict_model(unit_data=data, run_id=self.run_id)
+
+            return {"results": results}
+        except json.JSONDecodeError as e:
+            raise HTTPException(status_code=400, detail=f"Invalid JSON payload: {e}")
+        # data = request.json()
+        # results = evaluate.evaluate(run_id=self.run_id, dataset_loc=data.get("dataset"))
+        # return {"results": results}
 
     def predict_model(self, request: Request) -> Dict:
         data = request.json()
@@ -53,12 +70,12 @@ def get_run_id():
 
 @app.post("/evaluate/", response_model=dict)
 async def evaluate(request: Request):
-    return await model_deployment.evaluate(request)
+    return await model_deployment.evaluate_model(request)
 
 
 @app.post("/predict/", response_model=dict)
 async def predict_online(request: Request):
-    return await model_deployment.predict(request)
+    return await model_deployment.predict_model(request)
 
 
 if __name__ == "__main__":

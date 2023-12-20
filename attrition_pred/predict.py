@@ -59,7 +59,7 @@ def get_artifact_path(run_id: int) -> Path:
 
 
 @app.command()
-def get_best_run_id(experiment_name: str = "", metric: str = "", mode: str = "") -> str:  # pragma: no cover, mlflow logic
+def get_best_run_id(experiment_name: str, metric: str, mode: str) -> str:  # pragma: no cover, mlflow logic
     """Get the best run_id from an MLflow experiment.
 
     Args:
@@ -70,21 +70,21 @@ def get_best_run_id(experiment_name: str = "", metric: str = "", mode: str = "")
     Returns:
         str: best run id from experiment.
     """
-
     sorted_runs = mlflow.search_runs(
         experiment_names=[experiment_name],
         order_by=[f"metrics.{metric} {mode}"],
     )
-    run_id = sorted_runs.iloc[0].run_id
-    print(run_id)
-    return run_id
+    run_id = sorted_runs.iloc[0]  # .run_id
+    # run_id = run_id.split("\n")
+    print(run_id["run_id"])
+    # return run_id
 
 
 @app.command()
 def predict(
-    unit_data: dict,
+    unit_data: str,
     run_id: Annotated[str, typer.Option(help="id of the specific run to load from")],
-) -> dict:  # pragma: no cover, tested with inference workload
+) -> str:  # pragma: no cover, tested with inference workload
     """Predict Attrition given all attributes
 
     Args:
@@ -101,7 +101,9 @@ def predict(
 
     # y_true
     encoder_path = os.path.join(artifact_path, "encoder", "encoder.joblib")
-    unit_data_df = pd.DataFrame([unit_data])
+    unit_data_json = json.loads(unit_data)
+    unit_data_df = pd.DataFrame(unit_data_json)
+    # unit_data_df = pd.DataFrame([unit_data])
     test_X = preprocess_test(unit_data_df, encoder_path)
     # pred_Y = rf_model.predict(test_X)
     results = rf_model.predict_proba(test_X)
