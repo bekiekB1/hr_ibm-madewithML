@@ -82,13 +82,13 @@ def get_best_run_id(experiment_name: str, metric: str, mode: str) -> str:  # pra
 
 @app.command()
 def predict(
-    unit_data: str,
+    sample_path: str,
     run_id: Annotated[str, typer.Option(help="id of the specific run to load from")],
 ) -> str:  # pragma: no cover, tested with inference workload
     """Predict Attrition given all attributes
 
     Args:
-        unit_data (dict): test data
+        sample_path (str): test data or Send data Diretly with quote: '{...}'
         run_id (str): id of the specific run to load from. Defaults to None.
 
     Returns:
@@ -101,8 +101,17 @@ def predict(
 
     # y_true
     encoder_path = os.path.join(artifact_path, "encoder", "encoder.joblib")
-    unit_data_json = json.loads(unit_data)
-    unit_data_df = pd.DataFrame(unit_data_json)
+
+    # handle both path to json or json data itself like: '{...}
+    unit_data_json = None
+    if sample_path.startswith("{") and sample_path.endswith("}"):
+        unit_data_json = json.loads(sample_path)
+    else:
+        file_path = Path(sample_path)
+        with file_path.open("r") as json_file:
+            unit_data_json = json.load(json_file)
+    # unit_data_json = json.loads(sample_path)
+    unit_data_df = pd.DataFrame([unit_data_json])
     # unit_data_df = pd.DataFrame([unit_data])
     test_X = preprocess_test(unit_data_df, encoder_path)
     # pred_Y = rf_model.predict(test_X)

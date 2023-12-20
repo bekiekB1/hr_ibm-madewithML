@@ -92,25 +92,18 @@ python attrition_pred/evaluate.py \
 
 ### Inference
 ```bash
-export EXPERIMENT_NAME="llm"
-export RUN_ID=$(python madewithml/predict.py get-best-run-id --experiment-name $EXPERIMENT_NAME --metric val_loss --mode ASC)
-python madewithml/predict.py predict \
-    --run-id $RUN_ID \
-    --title "Transfer learning with transformers" \
-    --description "Using transformers for transfer learning on text classification tasks."
+python attrition_pred/predict.py \
+    predict \
+    data/processed/unit_sample.json \
+    --run-id 5d2575f94915464db85f82f33eb06efd
 ```
 ```json
-[{
-  "prediction": [
-    "natural-language-processing"
-  ],
-  "probabilities": {
-    "computer-vision": 0.0009767753,
-    "mlops": 0.0008223939,
-    "natural-language-processing": 0.99762577,
-    "other": 0.000575123
+[
+  {
+    "0": 0.24176165854349077,
+    "1": 0.75823834145651
   }
-}]
+]
 ```
 
 ### Serving
